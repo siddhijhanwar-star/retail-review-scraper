@@ -1,0 +1,45 @@
+name: Weekly Walmart & Target Scraper
+
+on:
+  schedule:
+    # Every Friday at 06:00 UTC (11:30 IST). Change if you want a different time.
+    - cron: "0 6 * * 5"
+  workflow_dispatch: {}  # allow manual manual runs from GitHub UI
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Target scraper
+        run: |
+          python target_scraper.py
+
+      - name: Run Walmart scraper
+        env:
+          WALMART_COOKIES: ${{ secrets.WALMART_COOKIES }}
+        run: |
+          python walmart_scraper.py
+
+      - name: Upload CSV outputs as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rating-outputs
+          path: |
+            Rating_Distribution_Target_*.csv
+            Avg_and_total_Target_*.csv
+            Rating_Distribution_Walmart_*.csv
+            Avg_and_total_Walmart_*.csv
