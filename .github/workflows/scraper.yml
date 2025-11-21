@@ -1,10 +1,9 @@
 name: Weekly Walmart & Target Scraper
 
 on:
+  workflow_dispatch: {}
   schedule:
-    # Every Friday at 06:00 UTC (11:30 IST). Change if you want a different time.
-    - cron: "0 6 * * 5"
-  workflow_dispatch: {}  # allow manual manual runs from GitHub UI
+    - cron: "0 11 * * 5"   # every Friday 4:30 IST (6:00 UTC)
 
 jobs:
   scrape:
@@ -14,10 +13,13 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v4
 
+      - name: Set run timestamp        # 👈 NEW STEP
+        run: echo "RUN_TS=$(date -u +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: "3.10"       # or whatever you're using
 
       - name: Install dependencies
         run: |
@@ -38,8 +40,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: rating-outputs
-          path: |
-            Rating_Distribution_Target_*.csv
-            Avg_and_total_Target_*.csv
-            Rating_Distribution_Walmart_*.csv
-            Avg_and_total_Walmart_*.csv
+          path: outputs/**.csv        # 👈 upload all CSVs inside outputs/
