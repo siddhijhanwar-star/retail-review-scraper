@@ -6,7 +6,13 @@ import requests
 import pandas as pd
 from datetime import datetime
 
+# Date for file naming
 date_of_scraping = datetime.today().strftime('%Y-%m-%d')
+
+# Folder for output (RUN_TS provided by GitHub Actions)
+run_ts = os.environ.get("RUN_TS", datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S'))
+output_dir = os.path.join("output", run_ts)
+os.makedirs(output_dir, exist_ok=True)
 
 TARGET_INPUT_CSV_PATH = "data/Target Input.csv"
 
@@ -114,16 +120,15 @@ order_columns = [
     "Average_Rating"
 ]
 
+# Save Files
 if target_rating:
-    target_final = pd.DataFrame(target_rating)
-    target_final = target_final[order_columns]
-    out_name = f"Rating_Distribution_Target_{date_of_scraping}.csv"
-    target_final.to_csv(out_name, index=False)
-    print(f"[Target] Saved detailed file -> {out_name}")
+    df_out = pd.DataFrame(target_rating)
 
-    data_avg = target_final[["Retailer", "SKU", "P_code", "Total", "Average_Rating"]]
-    avg_name = f"Avg_and_total_Target_{date_of_scraping}.csv"
-    data_avg.to_csv(avg_name, index=False)
-    print(f"[Target] Saved summary file -> {avg_name}")
+    df_out.to_csv(os.path.join(output_dir, f"Rating_Distribution_Target_{date_of_scraping}.csv"), index=False)
+    df_out[["Retailer", "SKU", "P_code", "Total", "Average_Rating"]].to_csv(
+        os.path.join(output_dir, f"Avg_and_total_Target_{date_of_scraping}.csv"), index=False
+    )
+
+    print("[Target] Output saved.")
 else:
-    print("[Target] No records scraped.")
+    print("[Target] No data scraped.")

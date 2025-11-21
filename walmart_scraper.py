@@ -7,43 +7,13 @@ import pandas as pd
 from datetime import datetime
 from urllib.parse import urlparse
 
-
-def get_walmart_domain(url: str) -> str:
-    """
-    Return 'com' or 'ca' based on the Walmart URL.
-    """
-    host = urlparse(url).hostname or ""
-    host = host.lower()
-    if "walmart.ca" in host:
-        return "ca"
-    if "walmart.com" in host:
-        return "com"
-    raise ValueError(f"Unknown Walmart domain in URL: {url}")
-
-
-def extract_walmart_id(url: str) -> str:
-    """
-    Try to extract the Walmart item id from the URL.
-    Handles common patterns like:
-      - /ip/.../<itemId>
-      - ?itemId=<itemId>
-    """
-    # e.g. https://www.walmart.com/ip/product-name/123456789
-    m = re.search(r"/(\d{5,})\b", url)
-    if m:
-        return m.group(1)
-
-    # Fallback: check query string for itemId=
-    parsed = urlparse(url)
-    qs = parsed.query or ""
-    m2 = re.search(r"itemId=(\d+)", qs)
-    if m2:
-        return m2.group(1)
-
-    raise ValueError(f"Could not extract Walmart item id from URL: {url}")
-
+from Api_Scraper import get_walmart_domain, extract_walmart_id
 
 date_of_scraping = datetime.today().strftime('%Y-%m-%d')
+run_ts = os.environ.get("RUN_TS", datetime.utcnow().strftime('%Y-%m-%d_%H-%M-%S'))
+output_dir = os.path.join("output", run_ts)
+os.makedirs(output_dir, exist_ok=True)
+
 
 WALMART_INPUT_CSV_PATH = "data/Walmart Input.csv"
 

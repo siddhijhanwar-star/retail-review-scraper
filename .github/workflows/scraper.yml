@@ -1,43 +1,49 @@
 name: Weekly Walmart & Target Scraper
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch: {}          # manual run
   schedule:
-    - cron: "0 11 * * 5"   # every Friday 4:30 IST (6:00 UTC)
+    - cron: "0 11 * * 5"         # every Friday 11:00 UTC (4:30 PM IST)
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
 
+    # 👇 These env vars are available to ALL steps (and imports)
+    env:
+      APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+      APIFY_ACTOR_ID: ${{ secrets.APIFY_ACTOR_ID }}
+      WALMART_COOKIES: ${{ secrets.WALMART_COOKIES }}
+
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
 
-      - name: Set run timestamp        # 👈 NEW STEP
+      - name: Set run timestamp
         run: echo "RUN_TS=$(date -u +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"       # or whatever you're using
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # If you want to run Api_Scraper directly (usually not needed), uncomment:
+      # - name: Run Api_Scraper helpers
+      #   run: python Api_Scraper.py
+
       - name: Run Target scraper
-        run: |
-          python target_scraper.py
+        run: python target_scraper.py
 
       - name: Run Walmart scraper
-        env:
-          WALMART_COOKIES: ${{ secrets.WALMART_COOKIES }}
-        run: |
-          python walmart_scraper.py
+        run: python walmart_scraper.py
 
       - name: Upload CSV outputs as artifacts
         uses: actions/upload-artifact@v4
         with:
           name: rating-outputs
-          path: outputs/**.csv        # 👈 upload all CSVs inside outputs/
+          path: output/**.csv
