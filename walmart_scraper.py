@@ -156,16 +156,15 @@ order_columns = [
     "Average_Rating"
 ]
 
+# SAVE
 if walmart_rating:
-    walmart_final = pd.DataFrame(walmart_rating)
-    walmart_final = walmart_final[order_columns]
-    out_name = f"Rating_Distribution_Walmart_{date_of_scraping}.csv"
-    walmart_final.to_csv(out_name, index=False)
-    print(f"[Walmart] Saved detailed file -> {out_name}")
+    df_out = pd.DataFrame(walmart_rating)
+    df_out.to_csv(os.path.join(output_dir, f"Rating_Distribution_Walmart_{date_of_scraping}.csv"), index=False)
 
-    data_avg = walmart_final[["Retailer", "SKU", "P_code", "Total", "Average_Rating"]]
-    avg_name = f"Avg_and_total_Walmart_{date_of_scraping}.csv"
-    data_avg.to_csv(avg_name, index=False)
-    print(f"[Walmart] Saved summary file -> {avg_name}")
+    df_out[["Retailer", "SKU", "P_code", "Total", "Average_Rating"]].to_csv(
+        os.path.join(output_dir, f"Avg_and_total_Walmart_{date_of_scraping}.csv"), index=False
+    )
+
+    print("[Walmart] Output saved.")
 else:
-    print("[Walmart] No records scraped.")
+    print("[Walmart] No data scraped.")
